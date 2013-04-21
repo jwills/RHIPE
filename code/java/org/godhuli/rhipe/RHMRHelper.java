@@ -27,7 +27,10 @@ import org.apache.hadoop.io.*;
 import java.net.InetAddress;
 
 import org.apache.hadoop.util.StringUtils;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.Configuration;
@@ -215,7 +218,7 @@ public class RHMRHelper {
 			   ,WritableComparable,RHBytesWritable> ctx) {
 	try {
 	    if (outThread_ == null) {
-		startOutputThreads(new DummyContext(ctx)); //will fail
+		startOutputThreads(ctx); //will fail
 	    }
 	    int exitVal = sim.waitFor();
 	    if (exitVal != 0) {
@@ -251,29 +254,6 @@ public class RHMRHelper {
 	    extraInfo = "subprocess exited with error code " + exitVal + "\n";
 	};
 	return(extraInfo);
-    }
-
-    class DummyContext extends TaskInputOutputContext<WritableComparable,RHBytesWritable,
-			       WritableComparable,RHBytesWritable> {
-	DummyContext(TaskInputOutputContext<WritableComparable,RHBytesWritable,
-		     WritableComparable,RHBytesWritable>ctx){
-	    super(null, null, null, null, null); //wont work
-	}
-	public RHBytesWritable getCurrentKey() throws IOException, InterruptedException {
-	    return null;
-	}
-	
-	public RHBytesWritable getCurrentValue() throws IOException, InterruptedException {
-	    return null;
-	}
-	public boolean nextKeyValue() throws IOException, InterruptedException {
-	    return false;
-	}
-	public void write(RHBytesWritable key, RHBytesWritable value
-			  ) throws IOException, InterruptedException {
-	}
-	public void setStatus(String status){}
-	public void progress(){}
     }
 
     public void writeCMD(int s) throws IOException{

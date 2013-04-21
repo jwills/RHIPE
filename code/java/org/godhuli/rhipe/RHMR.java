@@ -16,7 +16,9 @@
 
 package org.godhuli.rhipe;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Vector;
 import java.io.IOException;
 import java.io.DataInputStream;
@@ -353,12 +355,15 @@ public class RHMR implements Tool {
 
 	public static REXP buildListFromCounters(
 			org.apache.hadoop.mapreduce.Counters counters, double tt) {
-		String[] groupnames = counters.getGroupNames().toArray(new String[] {});
-		String[] groupdispname = new String[groupnames.length + 1];
+		List<String> groupnames = new ArrayList<String>();
+                for (String name : counters.getGroupNames()) {
+                  groupnames.add(name);
+                }
+		String[] groupdispname = new String[groupnames.size() + 1];
 		Vector<REXP> cn = new Vector<REXP>();
-		for (int i = 0; i < groupnames.length; i++) {
+		for (int i = 0; i < groupnames.size(); i++) {
 			org.apache.hadoop.mapreduce.CounterGroup cgroup = counters
-					.getGroup(groupnames[i]);
+					.getGroup(groupnames.get(i));
 			groupdispname[i] = cgroup.getDisplayName();
 			REXP.Builder cvalues = REXP.newBuilder();
 			Vector<String> cnames = new Vector<String>();
@@ -372,7 +377,7 @@ public class RHMR implements Tool {
 					.toArray(new String[] {})));
 			cn.add(cvalues.build());
 		}
-		groupdispname[groupnames.length] = "job_time";
+		groupdispname[groupnames.size()] = "job_time";
 		REXP.Builder cvalues = REXP.newBuilder();
 		cvalues.setRclass(REXP.RClass.REAL);
 		cvalues.addRealValue(tt);
